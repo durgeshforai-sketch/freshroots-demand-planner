@@ -252,7 +252,7 @@ export async function runPreplacementCheck(recId: number, body: PreplacementInpu
 
 export async function listExceptions(runId?: number) {
   const id = runId ?? (await prisma.run.findFirst({ orderBy: { createdAt: "desc" }, select: { id: true } }))?.id;
-  if (!id) return { runId: null, byCode: {}, items: [] };
+  if (!id) return { runId: null, byCode: {} as Record<string, number>, items: [] };
   const items = await prisma.recException.findMany({
     where: { runId: id },
     orderBy: [{ code: "asc" }, { skuCode: "asc" }],

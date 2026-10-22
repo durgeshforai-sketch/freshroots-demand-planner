@@ -2,9 +2,11 @@
 
 **Last updated:** 2026-10-22 (session 1)
 
-**Current position:** Phase 3/4 — API written (not smoke-tested, no DB yet); starting frontend while waiting on Neon login.
+**Current position:** Phase 4 code done and `npm run build` passes. BLOCKED on Neon login + secrets before migrate/ingest/smoke tests.
 
 ## Done
+- Frontend: src/proxy.ts (Next 16 'middleware') HMAC-signed cookie gate on APP_PASSWORD; /login, /api/login, /api/logout; pages /, /runs/[id] (filters, reason, approve/override/reject + pre-placement check), /exceptions, /skus/[code] (SVG chart + cover history); loading/error/not-found states. `npm run build` OK.
+- next.config: cacheComponents disabled (all pages are live data; force-dynamic). src/lib/db.ts creates Prisma lazily so build/CI work without DATABASE_URL.
 - API: src/lib/api.ts (handler wrapper, {error:{code,message}}), src/lib/validation.ts (zod), src/lib/services/planning.ts, all routes in spec + GET /api/skus/[code]. tsc + lint clean. NOT yet curl-tested (needs DB).
 - Data scripts: src/lib/services/csvLoader.ts, runInput.ts; scripts/ingest.ts (upserts, writes data-quality.md), check-data.ts, dry-run.ts (CSV→engine, no DB). Dry run 2026-10-19: STOCKOUT 2, OVERSTOCK 2, OK 8, EXCEPTION 3 (all E7), exception rate 20%, guardrail 0.20× units.
 - Engine (pure TS) in src/lib/engine: stats, evaluate (rules + E1–E7 + guardrail), preplacement, metrics; thresholds in src/config/engine.ts. Vitest: 19/19 pass incl. spec Ex1–Ex4.
@@ -19,11 +21,11 @@
 - Tools: node 24.15, npm 11.12, git 2.50, gh 2.94 (authed), Vercel CLI 63.1 (authed as durgeshforai-sketch). neonctl and psql are not installed; use `npx neonctl`.
 
 ## In progress
-- Frontend (Phase 4): src/proxy.ts password gate, /login, /, /runs/[id], /exceptions, /skus/[code].
+- Nothing running. Waiting on user for Neon.
 
 ## Next 3 actions
-1. Build the Phase 4 frontend; `npm run build`.
-1b. When Neon is ready: migrate, ingest, check-data, then curl-smoke every endpoint and record results here.
+1. When Neon is ready: `npx prisma migrate dev --name init`, `npm run data:ingest`, `npm run data:check`.
+1b. Curl-smoke every endpoint against `npm run dev`; record results here. Meanwhile: CI workflow, skills/, README (Phases 6–7, no DB needed).
 2. After Neon login: create project `freshroots-planner`; user pastes DATABASE_URL and DIRECT_URL into .env.local (A2.2).
 3. `npx prisma migrate dev --name init`, then write and run scripts/ingest.ts and scripts/check-data.ts.
 
