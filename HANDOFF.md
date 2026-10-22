@@ -5,6 +5,8 @@
 **Current position:** Phase 4 code done and `npm run build` passes. BLOCKED on Neon login + secrets before migrate/ingest/smoke tests.
 
 ## Done
+- Phase 6 (partial): .github/workflows/ci.yml (npm ci, lint, test, build), green on dev (48s). `main` protection now requires the `lint-test-build` check + PR.
+- Phase 7 (partial): skills/ (5 skills + 3 rubrics); README complete (setup, Monday flow, assumptions, limitations).
 - Frontend: src/proxy.ts (Next 16 'middleware') HMAC-signed cookie gate on APP_PASSWORD; /login, /api/login, /api/logout; pages /, /runs/[id] (filters, reason, approve/override/reject + pre-placement check), /exceptions, /skus/[code] (SVG chart + cover history); loading/error/not-found states. `npm run build` OK.
 - next.config: cacheComponents disabled (all pages are live data; force-dynamic). src/lib/db.ts creates Prisma lazily so build/CI work without DATABASE_URL.
 - API: src/lib/api.ts (handler wrapper, {error:{code,message}}), src/lib/validation.ts (zod), src/lib/services/planning.ts, all routes in spec + GET /api/skus/[code]. tsc + lint clean. NOT yet curl-tested (needs DB).
