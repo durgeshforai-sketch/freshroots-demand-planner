@@ -1,5 +1,5 @@
 /**
- * CSV → database column mapping (Step 0 proposal, awaiting confirmation).
+ * CSV → database column mapping. Confirmed by the user on 2026-10-22 (Step 0, A2.3).
  * Source files live in DATA_DIR. Fields marked `derived` or `default` are not in the CSVs.
  */
 
