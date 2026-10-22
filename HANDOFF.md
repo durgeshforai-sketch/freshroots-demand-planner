@@ -2,9 +2,10 @@
 
 **Last updated:** 2026-10-22 (session 1)
 
-**Current position:** Phase 4 code done and `npm run build` passes. BLOCKED on Neon login + secrets before migrate/ingest/smoke tests.
+**Current position:** Phases 1, 4, 6 and most of 7 done; Phase 5 linked. BLOCKED on Neon + secrets (A2.2): migrate, ingest, API smoke tests, Vercel env vars and preview smoke test all wait on this.
 
 ## Done
+- Vercel: project `freshroots-demand-planner` linked (.vercel/, gitignored) and GitHub repo connected, so pushes to dev deploy previews and main deploys production. `vercel link` added VERCEL_OIDC_TOKEN to .env.local and `.env*` to .gitignore; the gitignore line was removed (it hid .env.example).
 - Phase 6 (partial): .github/workflows/ci.yml (npm ci, lint, test, build), green on dev (48s). `main` protection now requires the `lint-test-build` check + PR.
 - Phase 7 (partial): skills/ (5 skills + 3 rubrics); README complete (setup, Monday flow, assumptions, limitations).
 - Frontend: src/proxy.ts (Next 16 'middleware') HMAC-signed cookie gate on APP_PASSWORD; /login, /api/login, /api/logout; pages /, /runs/[id] (filters, reason, approve/override/reject + pre-placement check), /exceptions, /skus/[code] (SVG chart + cover history); loading/error/not-found states. `npm run build` OK.
@@ -26,10 +27,9 @@
 - Nothing running. Waiting on user for Neon.
 
 ## Next 3 actions
-1. When Neon is ready: `npx prisma migrate dev --name init`, `npm run data:ingest`, `npm run data:check`.
-1b. Curl-smoke every endpoint against `npm run dev`; record results here. Meanwhile: CI workflow, skills/, README (Phases 6–7, no DB needed).
-2. After Neon login: create project `freshroots-planner`; user pastes DATABASE_URL and DIRECT_URL into .env.local (A2.2).
-3. `npx prisma migrate dev --name init`, then write and run scripts/ingest.ts and scripts/check-data.ts.
+1. After the user has set DATABASE_URL + DIRECT_URL in .env.local: `npx prisma migrate dev --name init`, `npm run data:ingest`, `npm run data:check`.
+2. After APP_PASSWORD is set: `npm run dev`; curl-smoke every endpoint (login cookie read from env, never printed); record results below. Then commit.
+3. Push the 3 Vercel env vars from .env.local without printing them (`vercel env add NAME preview|production` piped from the file); push dev; smoke-test the preview (login, run engine, approve one); finish the final HANDOFF checklist.
 
 ## Decisions made
 - Project root: `<case folder>/freshroots-planner`. DATA_DIR: the case folder (its parent), outside the repo.
@@ -50,14 +50,17 @@
 - Generated Prisma client goes to src/generated/prisma (gitignored, rebuilt on postinstall).
 
 ## Waiting on me
-- Neon login: user runs `npx neonctl@8.10.3 auth`.
-- Then DATABASE_URL and DIRECT_URL in .env.local.
+- Neon: either run `npx neonctl@8.10.3 auth` (then I create the project), or create project `freshroots-planner` in the Neon dashboard yourself.
+- .env.local: DATABASE_URL (pooled), DIRECT_URL (direct), APP_PASSWORD. User pastes the values.
+- Merge dev → main (A2.5) when ready for production.
 
 ## Env vars
 - DATABASE_URL — not set
 - DIRECT_URL — not set
 - DATA_DIR — set (.env.local)
 - APP_PASSWORD — not set
+- VERCEL_OIDC_TOKEN — set (written by `vercel link`)
+- Vercel project env vars (DATABASE_URL, DIRECT_URL, APP_PASSWORD) — not set
 
 ## Verify state
 - `git log -5 --oneline` and `git branch --show-current` (expect dev)
