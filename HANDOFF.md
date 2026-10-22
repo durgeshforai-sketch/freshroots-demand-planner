@@ -2,9 +2,11 @@
 
 **Last updated:** 2026-10-22 (session 1)
 
-**Current position:** Phase 2/3 — engine + tests done (19/19); waiting on Neon login; writing ingest + service layer meanwhile.
+**Current position:** Phase 3/4 — API written (not smoke-tested, no DB yet); starting frontend while waiting on Neon login.
 
 ## Done
+- API: src/lib/api.ts (handler wrapper, {error:{code,message}}), src/lib/validation.ts (zod), src/lib/services/planning.ts, all routes in spec + GET /api/skus/[code]. tsc + lint clean. NOT yet curl-tested (needs DB).
+- Data scripts: src/lib/services/csvLoader.ts, runInput.ts; scripts/ingest.ts (upserts, writes data-quality.md), check-data.ts, dry-run.ts (CSV→engine, no DB). Dry run 2026-10-19: STOCKOUT 2, OVERSTOCK 2, OK 8, EXCEPTION 3 (all E7), exception rate 20%, guardrail 0.20× units.
 - Engine (pure TS) in src/lib/engine: stats, evaluate (rules + E1–E7 + guardrail), preplacement, metrics; thresholds in src/config/engine.ts. Vitest: 19/19 pass incl. spec Ex1–Ex4.
 - prisma/schema.prisma written (11 models + enums), validated, client generated. Not migrated yet (no DB).
 - A2.3 mapping confirmed (see Decisions: Q_std, festival, distributor, no-price).
@@ -17,10 +19,11 @@
 - Tools: node 24.15, npm 11.12, git 2.50, gh 2.94 (authed), Vercel CLI 63.1 (authed as durgeshforai-sketch). neonctl and psql are not installed; use `npx neonctl`.
 
 ## In progress
-- Neon login pending. Next: scripts/ingest.ts, scripts/check-data.ts, scripts/dry-run.ts (CSV → engine, no DB), src/lib/services/*.
+- Frontend (Phase 4): src/proxy.ts password gate, /login, /, /runs/[id], /exceptions, /skus/[code].
 
 ## Next 3 actions
-1. Write ingest/check-data/dry-run scripts and the service layer.
+1. Build the Phase 4 frontend; `npm run build`.
+1b. When Neon is ready: migrate, ingest, check-data, then curl-smoke every endpoint and record results here.
 2. After Neon login: create project `freshroots-planner`; user pastes DATABASE_URL and DIRECT_URL into .env.local (A2.2).
 3. `npx prisma migrate dev --name init`, then write and run scripts/ingest.ts and scripts/check-data.ts.
 
@@ -37,6 +40,9 @@
 - E7 is checked only for STOCKOUT_RISK/HIGH_DEMAND. E2 swing is in either direction. E3 = flag active on the run date for the SKU, or for a distributor selling it (distributor-only flags).
 - Guardrail sums auto qty (exceptions excluded) vs Σ Q_std of all SKUs. FINDING: per-SKU Q ≤ 1.5×Q_std, so at 1.5× the guardrail only fires via rounding, bugs or config changes. Document in README for Raghav and Deepa.
 - Override rate = (OVERRIDE + REJECT) / decisions.
+- Decisions: only PENDING recs can be decided (409 otherwise). APPROVE on EXCEPTION is refused (409): Raghav must OVERRIDE with a qty or REJECT. OVERRIDE needs newQty and can't use reasonCode AGREE. decidedBy is optional in the body (default "Raghav Kulkarni"), an addition to the spec.
+- Pre-placement: POST without ownerDecision runs a check; with {owner, ownerDecision: PROCEED|REDUCE|CANCEL} it records the owner's call on the latest HOLD. If no new sales week has landed since the run, it checks event flags only and notes that in triggers.
+- Default runDate = latest inventory snapshot date.
 - Generated Prisma client goes to src/generated/prisma (gitignored, rebuilt on postinstall).
 
 ## Waiting on me
