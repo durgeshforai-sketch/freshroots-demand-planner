@@ -2,9 +2,18 @@
 
 **Last updated:** 2026-10-22 (session 1)
 
-**Current position:** Phases 1, 4, 6 and most of 7 done; Phase 5 linked. BLOCKED on Neon + secrets (A2.2): migrate, ingest, API smoke tests, Vercel env vars and preview smoke test all wait on this.
+**Current position:** Phase 3 smoke tests PASSED locally. Next: Phase 5 (Vercel env vars + preview smoke test).
 
 ## Done
+- Phase 3 local smoke test (2026-10-22, npm run dev, Neon): ALL PASS.
+  - health 200 (db up); unauthenticated /api/runs 401; login ok 200, bad password 401; page without cookie 307 → /login?next=/.
+  - POST /api/runs: bad date 400 VALIDATION_ERROR; valid 201 (run 1: STOCKOUT 2, OVERSTOCK 2, OK 8, EXC 3 = E7×3, matches dry run). GET runs 200; runs/999 404; runs/abc 400.
+  - recommendations: flag + perishable filters 200; flag=BOGUS 400. exceptions 200 {E7:3}. metrics 200. skus/SKU001 200, NOPE 404.
+  - decision: APPROVE on EXCEPTION 409; OVERRIDE without qty 400; OVERRIDE+AGREE 400; bad action 400; invalid JSON 400; APPROVE 201; second decision 409; exception OVERRIDE 900 201; REJECT 201; id 999 404.
+  - preplacement: on PENDING 409; on APPROVED → PROCEED; after DIST002 flag → HOLD; owner decision without owner 400; with owner 201.
+  - flags: no target 400; end<start 400; distributor flag 201. Next run (3): DIST002's SKU003/004/008/014 → E3 (exc rate 40%, above band).
+  - metrics after decisions: override rate 67% → overrideWarn true.
+  - UI: /, /runs/[id], /exceptions, /skus/SKU001, /login all 200 and render; the user ran the engine from the Browser pane (run 2).
 - Phase 2 complete: migration 20261022112544_init applied to Neon; ingest loaded Sku 15, Distributor 4, WeeklySale 240, InventorySnapshot 15, Festival 6, 0 rejects, in ~4s; re-run gives identical counts (idempotent). data-quality.md written. Sales ingest uses one INSERT…ON CONFLICT per 5k batch (row upserts timed out at 5s over the network). createRun transaction timeout raised to 30s.
 - Neon: logged in (free plan, org org-withered-art-69345243). Created project `freshroots-planner` id cool-silence-76446598, region aws-ap-southeast-1 (Singapore), Postgres 18, db `neondb`, branch `main`. vercel.json pins functions to sin1 to sit next to the DB.
 - Vercel: project `freshroots-demand-planner` linked (.vercel/, gitignored) and GitHub repo connected, so pushes to dev deploy previews and main deploys production. `vercel link` added VERCEL_OIDC_TOKEN to .env.local and `.env*` to .gitignore; the gitignore line was removed (it hid .env.example).
@@ -29,7 +38,6 @@
 - Nothing running. Waiting on user for Neon.
 
 ## Next 3 actions
-1. `npm run dev`; curl-smoke every endpoint (login cookie read from env, never printed); record results below. Then commit.
 3. Push the 3 Vercel env vars from .env.local without printing them (`vercel env add NAME preview|production` piped from the file); push dev; smoke-test the preview (login, run engine, approve one); finish the final HANDOFF checklist.
 
 ## Decisions made
