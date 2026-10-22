@@ -2,9 +2,10 @@
 
 **Last updated:** 2026-10-22 (session 1)
 
-**Current position:** Phase 2 — mapping confirmed; waiting on Neon login; writing schema and engine meanwhile.
+**Current position:** Phase 2/3 — engine + tests done (19/19); waiting on Neon login; writing ingest + service layer meanwhile.
 
 ## Done
+- Engine (pure TS) in src/lib/engine: stats, evaluate (rules + E1–E7 + guardrail), preplacement, metrics; thresholds in src/config/engine.ts. Vitest: 19/19 pass incl. spec Ex1–Ex4.
 - prisma/schema.prisma written (11 models + enums), validated, client generated. Not migrated yet (no DB).
 - A2.3 mapping confirmed (see Decisions: Q_std, festival, distributor, no-price).
 - Step 0: scripts/inspect-data.ts written and run (`npm run data:inspect`); proposal in src/config/columnMap.ts; shared CSV helpers in src/lib/csv.ts. Data is clean: 15 SKUs, 4 distributors, 16 ISO weeks (2026-W27..W42 = Mon 2026-06-29..Sun 2026-10-18), inventory as of 2026-10-19, no gaps, duplicates, unmatched IDs or negatives.
@@ -16,10 +17,10 @@
 - Tools: node 24.15, npm 11.12, git 2.50, gh 2.94 (authed), Vercel CLI 63.1 (authed as durgeshforai-sketch). neonctl and psql are not installed; use `npx neonctl`.
 
 ## In progress
-- Neon login pending (`npx neonctl@8.10.3 auth`). Writing prisma/schema.prisma, src/config/engine.ts, src/lib/engine/*.
+- Neon login pending. Next: scripts/ingest.ts, scripts/check-data.ts, scripts/dry-run.ts (CSV → engine, no DB), src/lib/services/*.
 
 ## Next 3 actions
-1. Write engine (src/lib/engine) + Vitest tests (schema.prisma done and validated).
+1. Write ingest/check-data/dry-run scripts and the service layer.
 2. After Neon login: create project `freshroots-planner`; user pastes DATABASE_URL and DIRECT_URL into .env.local (A2.2).
 3. `npx prisma migrate dev --name init`, then write and run scripts/ingest.ts and scripts/check-data.ts.
 
@@ -31,6 +32,11 @@
 - @types/node bumped to ^24 to satisfy the vitest peer dependency.
 - MAPPING (confirmed): Q_std = Sku.standardReorderQty from the CSV, falling back to 4×AVG12 (config `qStdSource`). Festival F = 1.25 if any day of [runDate, runDate+28d] overlaps a Festival [start,end]; calendar months become Festival rows spanning the month. WeeklySale.distributor is derived from sku_master.Distributor_ID. No unit price: guardrail compares UNITS (total Q vs 1.5× sum of Q_std); E6 and order value are skipped with a warning; rupees are used automatically when unitPrice exists. casePack defaults to 1; leadTime null means E5 is skipped; onOrder null is treated as 0 and labelled.
 - Out-of-footprint distributor regions (Karnataka, Gujarat) are kept and noted in data-quality.md.
+- Surge confirmation = rolling test: AVG4>1.2×D true for the window ending the latest week AND the window ending the week before (D uses the run's F). Spec tests give AVG values directly, so they call decideSku with explicit stats.
+- EXCEPTION rows keep qty=0 and store the engine figure in the reason ("Engine figure for reference").
+- E7 is checked only for STOCKOUT_RISK/HIGH_DEMAND. E2 swing is in either direction. E3 = flag active on the run date for the SKU, or for a distributor selling it (distributor-only flags).
+- Guardrail sums auto qty (exceptions excluded) vs Σ Q_std of all SKUs. FINDING: per-SKU Q ≤ 1.5×Q_std, so at 1.5× the guardrail only fires via rounding, bugs or config changes. Document in README for Raghav and Deepa.
+- Override rate = (OVERRIDE + REJECT) / decisions.
 - Generated Prisma client goes to src/generated/prisma (gitignored, rebuilt on postinstall).
 
 ## Waiting on me
