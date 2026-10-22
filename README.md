@@ -93,6 +93,12 @@ npm run data:dry-run                 # engine straight from CSVs, no DB
 - The sample has 15 SKUs, 4 distributors and 16 weeks. Production is about 400 SKUs, 1,200 distributors and 3 years. Ingest is batched, but expect to move to `createMany` or COPY for full volume.
 - The 15–20% judgment cases (launches, unusual distributors, one-off events) are routed, not solved.
 
+## Deployment
+- `dev` deploys to a Vercel **Preview**, `main` deploys to **Production**. Functions are pinned to `sin1` (Singapore), next to the Neon database in `aws-ap-southeast-1`.
+- Preview URLs are behind **Vercel Deployment Protection**, so you must be logged in to Vercel, or use `vercel curl <path> --deployment <url>`. Production is reachable by anyone with the link, and the app's password gate applies there too.
+- Migrations run locally (`npx prisma migrate deploy`), never in the Vercel build.
+- Preview and Production currently share one Neon database. Give Preview its own Neon branch before real use.
+
 ## Repo map
 - `src/lib/engine/`: pure rules engine and tests
 - `src/config/`: engine thresholds, column map, reason codes
