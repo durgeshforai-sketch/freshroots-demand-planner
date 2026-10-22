@@ -2,41 +2,46 @@
 
 **Last updated:** 2026-10-22 (session 1)
 
-**Current position:** Phase 1 — Project setup. Waiting on opening questions (A2.1).
+**Current position:** Phase 2 — Step 0 data inspection (writing scripts/inspect-data.ts).
 
 ## Done
-- Created CLAUDE.md, HANDOFF.md, docs/BUILD_SPEC.md (Part B verbatim) in provisional root `./freshroots-planner/`.
-- Inspected tools: node v24.15.0, npm 11.12.1, git 2.50.1, gh 2.94.0 (logged in as durgeshforai-sketch), Vercel CLI 63.1.0 (logged in as durgeshforai-sketch). neonctl and psql are not installed. No GitHub/Neon/Vercel MCP tools are present.
-- Read the case PDF and all 5 CSVs (see Decisions).
+- Phase 1 complete: GitHub repo https://github.com/durgeshforai-sketch/freshroots-demand-planner (public); `main` and `dev` pushed; `main` protected (PR required, 0 approvals, no force-push or deletion). Working branch: `dev`.
+- Scaffolded Next.js 16.4.2 (App Router, TS, ESLint, Tailwind 4, src/), Prisma 7.10.1 + @prisma/adapter-neon, Vitest 5, tsx, zod 4, dotenv. `postinstall` runs `prisma generate`.
+- Added src/lib/db.ts (Neon adapter, pooled DATABASE_URL), src/lib/logger.ts (JSON logs), prisma.config.ts, vitest.config.ts, .env.example, .gitignore, README skeleton.
+- Created CLAUDE.md, HANDOFF.md, docs/BUILD_SPEC.md (Part B verbatim).
+- Tools: node 24.15, npm 11.12, git 2.50, gh 2.94 (authed), Vercel CLI 63.1 (authed as durgeshforai-sketch). neonctl and psql are not installed; use `npx neonctl`.
 
 ## In progress
-- Waiting for answers: project root path, DATA_DIR path, GitHub repo name.
-- Files touched: CLAUDE.md, HANDOFF.md, docs/BUILD_SPEC.md.
+- Step 0: scripts/inspect-data.ts and src/config/columnMap.ts.
 
 ## Next 3 actions
-1. Move these 3 files to the confirmed project root if it differs, then scaffold Next.js + Prisma + Vitest there.
-2. git init, commit on `main`, create `dev`, create the GitHub repo with gh, push both branches, try branch protection.
-3. Write scripts/inspect-data.ts and run Step 0, then stop for mapping OK (A2.3).
+1. Write and run scripts/inspect-data.ts; propose src/config/columnMap.ts; STOP for mapping OK (A2.3).
+2. Neon project via `npx neonctl` (or dashboard steps); user sets DATABASE_URL and DIRECT_URL in .env.local (A2.2).
+3. Write schema.prisma from the mapping; `npx prisma migrate dev --name init`.
 
 ## Decisions made
-- Stack is fixed per spec.
-- Neon: neonctl is not installed. Plan: run it via `npx neonctl` (project-local, no global install); if it isn't authenticated, give the user the login command.
-- Early data observations (for Step 0): the CSVs are calendar (month-level festival flags, no festival names or dates), current_inventory (onHand only, no onOrder), distributor_master (4 distributors, two of them outside Maharashtra/Goa), sku_master (15 SKUs; Perishability High/Low; Standard_Reorder_Qty; a single Distributor_ID per SKU; no price, case pack or lead time), weekly_sales (SKU × ISO week only, no distributor column; W27–W42 2026; 16 weeks).
+- Project root: `<case folder>/freshroots-planner`. DATA_DIR: the case folder (its parent), outside the repo.
+- Prisma pinned to 7.10.1: npm's `latest` tag points to 8.0.0-rc.25, a prerelease.
+- Prisma 7 removes `url` and `directUrl` from schema.prisma. Equivalent setup: prisma.config.ts uses DIRECT_URL for the CLI and migrations; the app uses DATABASE_URL (pooled) via PrismaNeon. This deviates from the spec's "directUrl in schema.prisma" and has the same effect.
+- Next 16: `middleware.ts` is renamed `proxy.ts`. Use src/proxy.ts for the password gate. Route `params` are async.
+- @types/node bumped to ^24 to satisfy the vitest peer dependency.
+- Generated Prisma client goes to src/generated/prisma (gitignored, rebuilt on postinstall).
 
 ## Waiting on me
-- A2.1 opening questions (root path, DATA_DIR, repo name).
+- Nothing yet. Step 0 mapping OK comes next.
 
 ## Env vars
 - DATABASE_URL — not set
 - DIRECT_URL — not set
-- DATA_DIR — not set
+- DATA_DIR — not set (value will be the case folder path)
 - APP_PASSWORD — not set
 
 ## Verify state
-- `ls` in the project root (expect CLAUDE.md, HANDOFF.md, docs/BUILD_SPEC.md)
-- `git log -5 --oneline` (after Phase 1)
+- `git log -5 --oneline` and `git branch --show-current` (expect dev)
+- `npx tsc --noEmit` (run `npx next typegen` first if .next is missing)
 - `npm test` (after Phase 3)
 - `npx prisma migrate status` (after Phase 2)
 
 ## Known issues
-- No git repo yet.
+- `tsc` needs `npx next typegen` first on a fresh clone (LayoutProps comes from generated route types).
+- npm audit reports some advisories from the scaffold; not addressed (no `--force`).
