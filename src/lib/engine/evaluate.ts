@@ -118,7 +118,7 @@ export function decideSku(sku: SkuInput, stats: SkuStats, ctx: SkuContext): SkuR
   if ((flag === "STOCKOUT_RISK" || flag === "HIGH_DEMAND") && R > 0 && (IP + qty) / R < win.min)
     ex.push({
       code: "E7",
-      detail: `Capped order of ${fmt(qty)} still leaves ${fmt((IP + qty) / R, 1)} weeks of cover, below the ${win.min}-week minimum.`,
+      detail: `Capped order of ${fmt(qty)} still leaves ${fmt((IP + qty) / R, 2)} weeks of cover, below the ${win.min}-week minimum.`,
     });
 
   const suggestedQty = qty;
