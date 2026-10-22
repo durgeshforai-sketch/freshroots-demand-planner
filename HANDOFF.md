@@ -5,6 +5,7 @@
 **Current position:** Phases 1, 4, 6 and most of 7 done; Phase 5 linked. BLOCKED on Neon + secrets (A2.2): migrate, ingest, API smoke tests, Vercel env vars and preview smoke test all wait on this.
 
 ## Done
+- Phase 2 complete: migration 20261022112544_init applied to Neon; ingest loaded Sku 15, Distributor 4, WeeklySale 240, InventorySnapshot 15, Festival 6, 0 rejects, in ~4s; re-run gives identical counts (idempotent). data-quality.md written. Sales ingest uses one INSERT…ON CONFLICT per 5k batch (row upserts timed out at 5s over the network). createRun transaction timeout raised to 30s.
 - Neon: logged in (free plan, org org-withered-art-69345243). Created project `freshroots-planner` id cool-silence-76446598, region aws-ap-southeast-1 (Singapore), Postgres 18, db `neondb`, branch `main`. vercel.json pins functions to sin1 to sit next to the DB.
 - Vercel: project `freshroots-demand-planner` linked (.vercel/, gitignored) and GitHub repo connected, so pushes to dev deploy previews and main deploys production. `vercel link` added VERCEL_OIDC_TOKEN to .env.local and `.env*` to .gitignore; the gitignore line was removed (it hid .env.example).
 - Phase 6 (partial): .github/workflows/ci.yml (npm ci, lint, test, build), green on dev (48s). `main` protection now requires the `lint-test-build` check + PR.
@@ -28,8 +29,7 @@
 - Nothing running. Waiting on user for Neon.
 
 ## Next 3 actions
-1. After the user has set DATABASE_URL + DIRECT_URL in .env.local: `npx prisma migrate dev --name init`, `npm run data:ingest`, `npm run data:check`.
-2. After APP_PASSWORD is set: `npm run dev`; curl-smoke every endpoint (login cookie read from env, never printed); record results below. Then commit.
+1. `npm run dev`; curl-smoke every endpoint (login cookie read from env, never printed); record results below. Then commit.
 3. Push the 3 Vercel env vars from .env.local without printing them (`vercel env add NAME preview|production` piped from the file); push dev; smoke-test the preview (login, run engine, approve one); finish the final HANDOFF checklist.
 
 ## Decisions made
@@ -51,14 +51,13 @@
 - Generated Prisma client goes to src/generated/prisma (gitignored, rebuilt on postinstall).
 
 ## Waiting on me
-- .env.local: DATABASE_URL (pooled), DIRECT_URL (direct), APP_PASSWORD. User pastes the values.
 - Merge dev → main (A2.5) when ready for production.
 
 ## Env vars
-- DATABASE_URL — not set
-- DIRECT_URL — not set
+- DATABASE_URL — set (.env.local)
+- DIRECT_URL — set (.env.local)
 - DATA_DIR — set (.env.local)
-- APP_PASSWORD — not set
+- APP_PASSWORD — set (.env.local)
 - VERCEL_OIDC_TOKEN — set (written by `vercel link`)
 - Vercel project env vars (DATABASE_URL, DIRECT_URL, APP_PASSWORD) — not set
 
@@ -69,5 +68,6 @@
 - `npx prisma migrate status` (after Phase 2)
 
 ## Known issues
+- SECURITY: the Neon neondb_owner password (2nd one) was displayed in the chat transcript via `!` commands. Rotate it before production (Neon console → Roles → Reset password), then update .env.local and Vercel env vars.
 - `tsc` needs `npx next typegen` first on a fresh clone (LayoutProps comes from generated route types).
 - npm audit reports some advisories from the scaffold; not addressed (no `--force`).

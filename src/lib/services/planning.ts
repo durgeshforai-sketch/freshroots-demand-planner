@@ -89,7 +89,7 @@ export async function createRun(runDate?: string) {
       if (ex.length) await tx.recException.createMany({ data: ex });
     }
     return run;
-  });
+  }, { timeout: 30_000, maxWait: 10_000 }); // Neon is a network hop away; 5s default is tight
 
   if (result.status === "HALTED") logger.warn("run.halted", { runId: run.id, runDate: date, reason: result.haltReason });
   else logger.info("run.completed", { runId: run.id, runDate: date, byFlag: result.totals.byFlag, exceptionRate: result.totals.exceptionRate });

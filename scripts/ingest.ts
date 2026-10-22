@@ -26,18 +26,20 @@ async function main() {
     await prisma.sku.upsert({ where: { code: s.code }, create: data, update: data });
   }
 
-  // Sales in batched transactions (Neon HTTP/WebSocket round-trips are the slow part).
-  const CHUNK = 100;
+  // Sales: one INSERT … ON CONFLICT per batch. Row-by-row upserts are a round-trip each,
+  // which is too slow over the network at production volume (~400 SKUs × 156 weeks).
+  const CHUNK = 5000;
   for (let i = 0; i < d.sales.length; i += CHUNK) {
-    await prisma.$transaction(
-      d.sales.slice(i, i + CHUNK).map((s) =>
-        prisma.weeklySale.upsert({
-          where: { skuCode_distributorCode_weekStart: { skuCode: s.skuCode, distributorCode: s.distributorCode, weekStart: day(s.weekStart) } },
-          create: { ...s, weekStart: day(s.weekStart) },
-          update: { units: s.units },
-        }),
-      ),
-    );
+    const batch = d.sales.slice(i, i + CHUNK);
+    await prisma.$executeRaw`
+      INSERT INTO "WeeklySale" ("skuCode", "distributorCode", "weekStart", "units")
+      SELECT * FROM unnest(
+        ${batch.map((s) => s.skuCode)}::text[],
+        ${batch.map((s) => s.distributorCode)}::text[],
+        ${batch.map((s) => s.weekStart)}::date[],
+        ${batch.map((s) => s.units)}::int[]
+      )
+      ON CONFLICT ("skuCode", "distributorCode", "weekStart") DO UPDATE SET "units" = EXCLUDED."units"`;
   }
 
   for (const v of d.inventory)
