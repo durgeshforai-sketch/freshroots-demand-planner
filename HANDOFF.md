@@ -5,6 +5,7 @@
 **Current position:** Phase 2 — mapping confirmed; waiting on Neon login; writing schema and engine meanwhile.
 
 ## Done
+- prisma/schema.prisma written (11 models + enums), validated, client generated. Not migrated yet (no DB).
 - A2.3 mapping confirmed (see Decisions: Q_std, festival, distributor, no-price).
 - Step 0: scripts/inspect-data.ts written and run (`npm run data:inspect`); proposal in src/config/columnMap.ts; shared CSV helpers in src/lib/csv.ts. Data is clean: 15 SKUs, 4 distributors, 16 ISO weeks (2026-W27..W42 = Mon 2026-06-29..Sun 2026-10-18), inventory as of 2026-10-19, no gaps, duplicates, unmatched IDs or negatives.
 - Created .env.local (gitignored) with DATA_DIR set and blank secret slots.
@@ -18,7 +19,7 @@
 - Neon login pending (`npx neonctl@8.10.3 auth`). Writing prisma/schema.prisma, src/config/engine.ts, src/lib/engine/*.
 
 ## Next 3 actions
-1. Write schema.prisma + engine + Vitest tests (no DB needed).
+1. Write engine (src/lib/engine) + Vitest tests (schema.prisma done and validated).
 2. After Neon login: create project `freshroots-planner`; user pastes DATABASE_URL and DIRECT_URL into .env.local (A2.2).
 3. `npx prisma migrate dev --name init`, then write and run scripts/ingest.ts and scripts/check-data.ts.
 
