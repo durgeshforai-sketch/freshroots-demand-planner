@@ -1,0 +1,10 @@
+// Models are added in Phase 2 after the Step 0 data mapping is confirmed.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
