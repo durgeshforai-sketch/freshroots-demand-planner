@@ -5,6 +5,7 @@
 **Current position:** Phase 3 smoke tests PASSED locally. Next: Phase 5 (Vercel env vars + preview smoke test).
 
 ## Done
+- Vercel env vars DATABASE_URL, DIRECT_URL, APP_PASSWORD set for Production + Preview as Secret (piped from .env.local, never printed). `prisma migrate status`: up to date.
 - Phase 3 local smoke test (2026-10-22, npm run dev, Neon): ALL PASS.
   - health 200 (db up); unauthenticated /api/runs 401; login ok 200, bad password 401; page without cookie 307 → /login?next=/.
   - POST /api/runs: bad date 400 VALIDATION_ERROR; valid 201 (run 1: STOCKOUT 2, OVERSTOCK 2, OK 8, EXC 3 = E7×3, matches dry run). GET runs 200; runs/999 404; runs/abc 400.
@@ -67,7 +68,7 @@
 - DATA_DIR — set (.env.local)
 - APP_PASSWORD — set (.env.local)
 - VERCEL_OIDC_TOKEN — set (written by `vercel link`)
-- Vercel project env vars (DATABASE_URL, DIRECT_URL, APP_PASSWORD) — not set
+- Vercel project env vars (DATABASE_URL, DIRECT_URL, APP_PASSWORD) — set (Production + Preview, Secret)
 
 ## Verify state
 - `git log -5 --oneline` and `git branch --show-current` (expect dev)
@@ -76,6 +77,7 @@
 - `npx prisma migrate status` (after Phase 2)
 
 ## Known issues
+- Preview and Production share the same Neon database (branch `main`). Before real use, create a Neon `preview` branch and point the Preview env vars at it.
 - SECURITY: the Neon neondb_owner password (2nd one) was displayed in the chat transcript via `!` commands. Rotate it before production (Neon console → Roles → Reset password), then update .env.local and Vercel env vars.
 - `tsc` needs `npx next typegen` first on a fresh clone (LayoutProps comes from generated route types).
 - npm audit reports some advisories from the scaffold; not addressed (no `--force`).
