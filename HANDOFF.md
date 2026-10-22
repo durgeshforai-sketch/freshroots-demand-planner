@@ -5,6 +5,7 @@
 **Current position:** Phases 1, 4, 6 and most of 7 done; Phase 5 linked. BLOCKED on Neon + secrets (A2.2): migrate, ingest, API smoke tests, Vercel env vars and preview smoke test all wait on this.
 
 ## Done
+- Neon: logged in (free plan, org org-withered-art-69345243). Created project `freshroots-planner` id cool-silence-76446598, region aws-ap-southeast-1 (Singapore), Postgres 18, db `neondb`, branch `main`. vercel.json pins functions to sin1 to sit next to the DB.
 - Vercel: project `freshroots-demand-planner` linked (.vercel/, gitignored) and GitHub repo connected, so pushes to dev deploy previews and main deploys production. `vercel link` added VERCEL_OIDC_TOKEN to .env.local and `.env*` to .gitignore; the gitignore line was removed (it hid .env.example).
 - Phase 6 (partial): .github/workflows/ci.yml (npm ci, lint, test, build), green on dev (48s). `main` protection now requires the `lint-test-build` check + PR.
 - Phase 7 (partial): skills/ (5 skills + 3 rubrics); README complete (setup, Monday flow, assumptions, limitations).
@@ -50,7 +51,6 @@
 - Generated Prisma client goes to src/generated/prisma (gitignored, rebuilt on postinstall).
 
 ## Waiting on me
-- Neon: either run `npx neonctl@8.10.3 auth` (then I create the project), or create project `freshroots-planner` in the Neon dashboard yourself.
 - .env.local: DATABASE_URL (pooled), DIRECT_URL (direct), APP_PASSWORD. User pastes the values.
 - Merge dev → main (A2.5) when ready for production.
 
