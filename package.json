@@ -12,7 +12,8 @@
     "postinstall": "prisma generate",
     "data:inspect": "tsx scripts/inspect-data.ts",
     "data:ingest": "tsx scripts/ingest.ts",
-    "data:check": "tsx scripts/check-data.ts"
+    "data:check": "tsx scripts/check-data.ts",
+    "data:dry-run": "tsx scripts/dry-run.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
