@@ -1,12 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Icon } from "@/components/ui";
 
-export function RunEngineButton({ defaultDate }: { defaultDate: string }) {
+export function RunEngineButton({ defaultDate, tone = "light" }: { defaultDate: string; tone?: "light" | "dark" }) {
   const router = useRouter();
   const [runDate, setRunDate] = useState(defaultDate);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dark = tone === "dark";
 
   async function run() {
     setBusy(true);
@@ -26,13 +28,34 @@ export function RunEngineButton({ defaultDate }: { defaultDate: string }) {
   return (
     <div className="flex flex-wrap items-end gap-2">
       <label className="text-sm">
-        <span className="block text-xs text-slate-500">Run date</span>
-        <input type="date" value={runDate} onChange={(e) => setRunDate(e.target.value)} className="rounded border border-slate-300 px-2 py-1.5" />
+        <span className={`mb-1 flex items-center gap-1 text-xs ${dark ? "text-white/70" : "text-muted"}`}>
+          <Icon name="calendar" className="h-3 w-3" /> Run date
+        </span>
+        <input
+          type="date"
+          value={runDate}
+          onChange={(e) => setRunDate(e.target.value)}
+          className={`rounded-xl border px-3 py-2 text-sm font-semibold tabular outline-none transition ${
+            dark ? "border-white/20 bg-white/10 text-white [color-scheme:dark] focus:border-marigold-300" : "input w-auto"
+          }`}
+        />
       </label>
-      <button onClick={run} disabled={busy || !runDate} className="rounded bg-emerald-700 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-60">
-        {busy ? "Running…" : "Run engine"}
+      <button onClick={run} disabled={busy || !runDate} className={`btn px-4 py-2 text-sm ${dark ? "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25" : "btn-primary"}`}>
+        {busy ? (
+          <>
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden /> Running…
+          </>
+        ) : (
+          <>
+            <Icon name="play" className="h-3.5 w-3.5" /> Run engine
+          </>
+        )}
       </button>
-      {error && <p className="w-full text-sm text-red-700" role="alert">{error}</p>}
+      {error && (
+        <p className={`animate-rise w-full text-sm ${dark ? "text-marigold-300" : "text-risk"}`} role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

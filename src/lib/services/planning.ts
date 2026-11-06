@@ -323,7 +323,7 @@ export async function skuDetail(code: string) {
   const weeks = [...totals].map(([weekStart, units]) => ({ weekStart, units })).sort((a, b) => a.weekStart.localeCompare(b.weekStart));
   const series = weeks.map((w) => {
     const st = computeStats(weeks, addDays(w.weekStart, 7), engineConfig);
-    return { weekStart: w.weekStart, units: w.units, avg4: st.avg4, avg12: st.historyWeeks >= engineConfig.avgLongWeeks ? st.avg12 : null };
+    return { weekStart: w.weekStart, units: w.units, avg4: st.historyWeeks >= engineConfig.avgShortWeeks ? st.avg4 : null, avg12: st.historyWeeks >= engineConfig.avgLongWeeks ? st.avg12 : null };
   });
   return { ...sku, unitPrice: toNum(sku.unitPrice), series };
 }
