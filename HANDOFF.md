@@ -1,8 +1,8 @@
 # HANDOFF
 
-**Last updated:** 2026-10-22 (session 1, end)
+**Last updated:** 2026-11-06 (session 2)
 
-**Current position:** BUILD COMPLETE on `dev`. Phases 1–7 are done and verified. The only open item is the production release (merge dev → main), which waits on the user (A2.5).
+**Current position:** v1 is LIVE in production (PR #1 merged 2026-11-06). UI redesign done on `dev` and verified locally; promoting it to production needs a new PR dev → main (A2.5).
 
 ## Build checklist
 - [x] Phase 1: scaffold, GitHub repo, `main` + `dev`, branch protection (PR + green CI required on main)
@@ -10,11 +10,18 @@
 - [x] Phase 3: pure engine (19/19 tests incl. spec Ex1–Ex4), service layer, all API routes, local curl smoke test
 - [x] Phase 4: password gate (src/proxy.ts), dashboard, run review, exceptions, SKU page; build passes
 - [x] Phase 5: Vercel linked, env vars set, preview deployed and smoke-tested
-- [ ] Phase 5: production. Merge dev → main (user decision, A2.5)
+- [x] Phase 5: production. PR #1 merged 2026-11-06; prod health 200, login + /api/runs + pages 200
+- [x] UI redesign (session 2): design tokens, dashboard work-queue, cover bars, gauges, animations; desktop + mobile checked
 - [x] Phase 6: CI (lint, test, build) green; JSON logs for runs, decisions, guardrail halts, auth, pre-placement
 - [x] Phase 7: 5 skills + 3 rubrics in skills/, README complete
 
 ## Done
+- Session 2 (2026-11-06):
+  - Project folder moved by the user to `~/Desktop/Desktop/Desktop - Durgesh's MacBook Pro/...` (iCloud-synced). Files were cloud-only (`dataless`): materialised by reading them; node_modules reinstalled with `npm ci`. DATA_DIR in .env.local updated to the new folder.
+  - `gh` active account is now jee1healthmain-maker (no repo access). Repo ops use `GH_TOKEN=$(gh auth token -u durgeshforai-sketch)` per command; global active account NOT changed.
+  - PR #1 merged → production rebuilt with env vars. Prod check: /api/health 200 (db up), login 200, /api/runs 200, /, /exceptions, /runs/latest 200.
+  - Redesign: globals.css tokens (paper / forest / marigold, semantic flag colours), Manrope font, motion keyframes with prefers-reduced-motion off-switch. New components: AnimatedNumber (DOM count-up), Gauge, NavLinks, CoverBar, BandMeter, icons. Rewritten: layout (sticky blurred header, flow footer), dashboard (hero + review progress, urgency tiles, gauge/meters), run review (filter chips with counts, urgency sort, cover bars, one-click approve, override popover, saved animation), exceptions (cards per code), SKU page (animated chart, cover-over-time strip), login (split brand panel, shake on error), skeleton loaders, error/404.
+  - Fixes found during review: /runs/latest redirect now keeps filters; AVG4 line only drawn after 4 weeks of history (was a ramp artifact); cover strip percentage heights.
 - Preview smoke test PASS (https://freshroots-demand-planner-akn9p2v1n.vercel.app, behind Vercel Deployment Protection; use `vercel curl`): health 200 (DB 221ms), unauthenticated 401, login 200, POST /api/runs 201 (run 4), APPROVE rec 56 (SKU011) 201, metrics 200; pages /, /runs/4, /exceptions, /skus/SKU011 all 200.
 - Vercel env vars DATABASE_URL, DIRECT_URL, APP_PASSWORD set for Production + Preview as Secret (piped from .env.local, never printed). vercel.json pins functions to sin1.
 - Local smoke test PASS (npm run dev + Neon), covering every endpoint:
@@ -31,8 +38,8 @@
 - Nothing. The local dev server may still be running from the Browser pane (`freshroots-dev`, port 3000).
 
 ## Next 3 actions
-1. User: rotate the Neon password (see Known issues), then update .env.local and re-run the Vercel env push (`vercel env add NAME production|preview --sensitive --force`, piped from the file).
-2. User OK → open PR dev → main, wait for green CI, merge, and smoke-test production (login, run engine, approve one).
+1. User OK → PR dev → main for the redesign; wait for CI; merge; smoke-test production.
+2. User: rotate the Neon password, update .env.local, re-push Vercel env vars (`vercel env add NAME production|preview --sensitive --force`, piped from the file).
 3. Raghav review: walk through README "Assumptions Raghav must confirm" and update src/config/engine.ts via skills/engine_rules_change.md.
 
 ## Decisions made
@@ -49,7 +56,7 @@
 
 ## Waiting on me
 - Rotate the Neon password (security, see below).
-- Approve merging dev → main for production (A2.5).
+- Approve the redesign release (PR dev → main, A2.5).
 
 ## Env vars
 - DATABASE_URL — set (.env.local; Vercel Production + Preview)
@@ -68,6 +75,7 @@
 - `vercel ls freshroots-demand-planner | head -5`
 
 ## Known issues
+- The project lives in an iCloud-synced folder: files can be evicted to cloud-only, making git/npm very slow. Consider 'Keep Downloaded' on the folder, or moving it outside iCloud.
 - SECURITY: the current Neon neondb_owner password appeared in the chat transcript. Rotate it before production (Neon console → Branches → main → Roles → Reset password), then update .env.local and the Vercel env vars.
 - Preview and Production share one Neon database. Create a Neon `preview` branch for Preview before real use.
 - The DB contains smoke-test data: runs 1–4, decisions and pre-placement checks, and event flag #1 (DIST002 "Competitor scheme in Pune, Nashik", 15 Oct–15 Nov 2026), which makes DIST002's SKUs E3 exceptions. Clear these before a demo if you want a clean slate.
