@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Every page shows live planning data, so pages render per request (force-dynamic)
+  // instead of using Cache Components / partial prerendering.
+  cacheComponents: false,
   turbopack: {
     rules: {
       "*.css": {
